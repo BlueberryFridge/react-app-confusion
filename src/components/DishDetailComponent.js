@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardImg, CardBody, CardTitle, CardText } from 'reactstrap';
 
+
+
 function RenderDish({ dish }) {
     if(dish) {
         return(
@@ -47,8 +49,7 @@ const DishDetail = (props) => {
             </div>
         );
     }
-    else return <div></div>;
-    
+    else return <div></div>;  
 }
 
 export default DishDetail;
