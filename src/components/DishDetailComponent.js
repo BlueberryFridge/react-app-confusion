@@ -1,8 +1,11 @@
-import React from 'react';
-import { Card, CardImg, CardBody, CardTitle, CardText, Breadcrumb, BreadcrumbItem } from 'reactstrap';
+import React, {Component} from 'react';
+import { Card, CardImg, CardBody, CardTitle, CardText, 
+         Breadcrumb, BreadcrumbItem,
+         Button, Modal, ModalHeader, ModalBody, Label, Col, Row } from 'reactstrap';
+import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Link } from 'react-router-dom';
 
-
+//------------------------------------------------------------ FUNCTIONAL COMPONENT: RENDER DISH ------------------------------------------------------------//
 function RenderDish({ dish }) {
     if(dish) {
         return(
@@ -20,6 +23,7 @@ function RenderDish({ dish }) {
     else return <div></div>;
 }
 
+//------------------------------------------------------------ FUNCTIONAL COMPONENT: RENDER COMMENTS ------------------------------------------------------------//
 function RenderComments({ comments }) {
     if(comments) {
         return (
@@ -31,36 +35,120 @@ function RenderComments({ comments }) {
                         <li>-- {commentDetails.author}, {new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(commentDetails.date)))}</li>
                     </ul>
                 )}
-            </div>
+                <CommentForm />
+            </div>   
         );
     } 
     else return <div></div>;
 }
 
+//------------------------------------------------------------ CLASS COMPONENT: COMMENT MODAL ------------------------------------------------------------//
+const required = value => value && value.length;
+const minLength = length => value => value && (value.length >= length);
+const maxLength = length => value => !value || (value.length <= length);
 
-const DishDetail = (props) => {   
-    if(props.dish) {
-        console.log(props.comments);
-        return(
-            <div className='container'>
-                <div className='row'>
-                    <Breadcrumb>
-                        <BreadcrumbItem><Link to='/menu'>Menu</Link></BreadcrumbItem>
-                        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-                    </Breadcrumb>
-                    <div className='col-12'>
-                        <h3>{props.dish.name}</h3>
-                        <hr />
+class CommentForm extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isCommentModalOpen: false
+        }
+        this.toggleCommentModal = this.toggleCommentModal.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    toggleCommentModal() {
+        this.setState({isCommentModalOpen: !this.state.isCommentModalOpen});
+    }
+
+    handleSubmit(values) {
+        this.toggleCommentModal();
+        alert(`Current state: ${JSON.stringify(values)}`);
+    }
+
+    render() {
+        return (
+            <>
+                <Button outline onClick={this.toggleCommentModal}>
+                    <span className='fa fa-pencil fa-lg' /> Submit Comment
+                </Button>
+
+                <Modal isOpen={this.state.isCommentModalOpen} toggle={this.toggleCommentModal}>
+                    <ModalHeader toggle={this.toggleCommentModal}>Submit Comment</ModalHeader>
+                    <ModalBody>
+                        <LocalForm onSubmit={values => this.handleSubmit(values)}>
+                            <Row className='form-group'>
+                                <Label htmlFor='rating' xs={12}>Rating</Label>
+                                <Col xs={12}>
+                                    <Control.select model='.rating' name='rating' id='rating'
+                                                    className='form-control'>
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                    </Control.select>
+                                </Col>
+                            </Row>
+                            <Row className='form-group'>
+                                <Label htmlFor='author' xs={12}>Your Name</Label>
+                                <Col xs={12}>
+                                    <Control.text model='.author' name='author' id='author'
+                                                  className='form-control'
+                                                  validators={{required, minLength: minLength(3), maxLength: maxLength(15)}}
+                                                  placeholder='Your name' />
+                                    <Errors className='text-danger'
+                                        model='.author'
+                                        show='touched'
+                                        messages={{required: 'Required',
+                                        minLength: 'Must be at least 3 characters',
+                                        maxLength: 'Must be less than 15 characters'}} />
+                                </Col>
+                            </Row>
+                            <Row className='form-group'>
+                                <Label htmlFor='comment' xs={12}>Comment</Label>
+                                <Col xs={12}>
+                                    <Control.textarea model='.comment' name='comment' id='comment'
+                                                      rows='6'
+                                                      className='form-control' />
+                                </Col>
+                            </Row>
+                            <Row className='form-group'>
+                                <Col xs={12}>
+                                    <Button type='submit' color='primary'>Submit</Button>
+                                </Col>
+                            </Row>
+                        </LocalForm>
+                    </ModalBody>
+                </Modal>
+            </>
+        );
+    }
+}
+
+//------------------------------------------------------------ CLASS COMPONENT: DISH DETAILS ------------------------------------------------------------//
+const DishDetail = (props) => {       
+        if(props.dish) {
+            return(
+                <div className='container'>
+                    <div className='row'>
+                        <Breadcrumb>
+                            <BreadcrumbItem><Link to='/menu'>Menu</Link></BreadcrumbItem>
+                            <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+                        </Breadcrumb>
+                        <div className='col-12'>
+                            <h3>{props.dish.name}</h3>
+                            <hr />
+                        </div>
                     </div>
-                </div>
                     <div className='row'>
                         <RenderDish dish={props.dish} />
                         <RenderComments comments={props.comments} />
                     </div>
-            </div>
-        );
-    }
-    else return <div></div>;  
+                </div>
+            );
+        }
+        else return <div></div>; 
 }
 
 export default DishDetail;
