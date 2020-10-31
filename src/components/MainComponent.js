@@ -44,7 +44,6 @@ class Main extends Component {
   }
 
   render(){
-    console.log(this.props);
     const HomePage = () => <Home dish={this.props.dishes.dishes.filter(dish => dish.featured)[0]}
                                  dishesLoading={this.props.dishes.isLoading}
                                  dishesErrMess={this.props.dishes.errMess}
