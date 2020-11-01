@@ -1,6 +1,8 @@
 import * as ActionTypes from './ActionTypes';
 import { baseUrl } from '../shared/baseUrl';
 
+
+//-------------------------------------------- POST method: add comment --------------------------------------------//
 export const addComment = (comment) => ({
     type: ActionTypes.ADD_COMMENT,
     payload: comment
@@ -42,6 +44,40 @@ export const postComment = (dishId, rating, author, comment) => (dispatch) => {
                 });
 }
 
+//-------------------------------------------- POST method: add feedback --------------------------------------------//
+export const postFeedback = (values) => {
+    const newFeedback = {...values}
+    newFeedback.date = new Date().toISOString();
+    fetch(`${baseUrl}feedback`, {
+            method: 'POST',
+            body: JSON.stringify(newFeedback),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if(response.ok) return response;
+            else {
+                var err = new Error(`Error ${response.status}: ${response.statusText}`);
+                err.response = response;
+                throw err;
+            }
+        }, err => {
+            var errMess = new Error(err.message);
+            throw errMess;
+        })
+        .then(response => response.json())
+        .then(feedback => {
+            alert(`Feedback sent. ${JSON.stringify(feedback)}`);
+            console.log(`Feedback sent. ${JSON.stringify(feedback)}`);
+        })
+        .catch(err => {
+            console.log('Post feedback', err.message);
+            alert(`Your feedback cannot be processed.\nError: ${err.message}`)})
+}
+
+//--------------------------------------------------- DISHES ---------------------------------------------------//
 export const fetchDishes = () => (dispatch) => {
     dispatch(dishesLoading(true));
 
@@ -76,6 +112,7 @@ export const addDishes = (dishes) => ({
     payload: dishes
 });
 
+//--------------------------------------------------- COMMENTS ---------------------------------------------------//
 export const fetchComments = () => dispatch => {
     return fetch(`${baseUrl}comments`)
                 .then(response => {
@@ -104,6 +141,7 @@ export const commentsFailed = (errMess) => ({
     payload: errMess
 });
 
+//--------------------------------------------------- PROMOTIONS ---------------------------------------------------//
 export const fetchPromos = () => (dispatch) => {
     dispatch(promosLoading());
 
@@ -135,5 +173,40 @@ export const promosLoading = () => ({
 
 export const promosFailed = (errMess) => ({
     type: ActionTypes.PROMOS_FAILED,
+    payload: errMess
+});
+
+//--------------------------------------------------- LEADERS ---------------------------------------------------//
+export const fetchLeaders = () => (dispatch) => {
+    dispatch(leadersLoading());
+
+    return fetch(`${baseUrl}leaders`)
+                .then(response => {
+                    if(response.ok) return response;
+                    else {
+                        var err = new Error(`Error ${response.status}: ${response.statusText}`);
+                        err.response = response;
+                        throw err;
+                    }
+                }, err => {
+                    var errMess = new Error(err.message);
+                    throw errMess;
+                })
+                .then(response => response.json())
+                .then(leaders => dispatch(addLeaders(leaders)))
+                .catch(err => dispatch(leadersFailed(err.message)));
+}
+
+export const leadersLoading = () => ({
+    type: ActionTypes.LEADERS_LOADING
+});
+
+export const addLeaders = (leaders) => ({
+    type: ActionTypes.ADD_LEADERS,
+    payload: leaders
+});
+
+export const leadersFailed = (errMess) => ({
+    type: ActionTypes.LEADERS_FAILED,
     payload: errMess
 });
