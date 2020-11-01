@@ -37,7 +37,7 @@ function RenderComments({ comments, postComment, dishId }) {
                 <h4>Comments</h4>
                 <Stagger in>
                     {comments.map(commentDetails => 
-                        <Fade in>
+                        <Fade in key={commentDetails.id}>
                             <ul className='list-unstyled' key={commentDetails.id}>
                                 <li>{commentDetails.comment}</li>
                                 <li>-- {commentDetails.author}, {new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(commentDetails.date)))}</li>
